@@ -2,11 +2,11 @@
 
 (defvar *eliza-rules*
   '(((($* $x) hello ($* $y))
-     (What's crackin' holmes?))
+     (What\'s crackin\' holmes\?))
 
     ((($* $x) I want ($* $y))
-     (Why do you want $y , yo?)
-     (Say you got $y \. Then what?)
+     (Why do you want $y , yo\?)
+     (Say you got $y \. Then what\?)
      (What would it mean if you got $y \?))))
 
 (defun eliza ()

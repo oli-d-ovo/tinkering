@@ -10,10 +10,8 @@
      (What would it mean if you got $y \?))))
 
 (defun eliza ()
-  "Need to make this more Elispy"
   (loop
-   (print 'eliza>)
-   (message (present-response (read)))))
+   (message (present-response (read-from-minibuffer "eliza> ")))))
 
 (defun present-response (resp)
   (mapconcat 'identity

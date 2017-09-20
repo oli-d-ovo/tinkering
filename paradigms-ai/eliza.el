@@ -55,7 +55,7 @@
        (equal (first (first pattern)) '$*)))
 
 (defun segment-match (pattern input bindings start)
-  (let ((var (first pattern))
+  (let ((var (second (first pattern)))
         (pat (rest pattern)))
     (if (null pat)
         (match-variable var input bindings)

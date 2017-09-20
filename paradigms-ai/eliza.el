@@ -1,5 +1,25 @@
 ;; -*- lexical-binding: t -*-
 
+(defvar *eliza-rules*
+  '(((($* $x) hello ($* $y))
+     (What's crackin' holmes?))
+
+    ((($* $x) I want ($* $y))
+     (Why do you want $y , yo?)
+     (Say you got $y \. Then what?)
+     (What would it mean if you got $y \?))))
+
+(defun eliza ()
+  "Need to make this more Elispy"
+  (loop
+   (print 'eliza>)
+   (message (present-response (read)))))
+
+(defun present-response (resp)
+  (mapconcat 'identity
+             (mapcar #'symbol-name (apply #'append resp))
+             " "))
+
 (defconst fail nil)
 
 (defconst no-bindings '((t . t)))
@@ -63,7 +83,12 @@
                            :start start :test #'equal)))
         (if (null pos)
             fail
-          (let ((b2 (pat-match* pat (subseq input pos) bindings)))
+          (let ((b2 (pat-match* pat (subseq input pos)
+                                (match-variable var (subseq input 0 pos) bindings))))
             (if (eq b2 fail)
                 (segment-match pattern input bindings (+ pos 1))
-              (match-variable var (subseq input 0 pos) b2))))))))
+              b2)))))))
+
+(defun rule-pattern (rule) (first rule))
+
+(defun rule-responses (rule) (rest rule))

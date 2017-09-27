@@ -25,6 +25,10 @@
                         (seq-random-elt (rule-responses rule))))))
         *eliza-rules*))
 
+(defun rule-pattern (rule) (first rule))
+
+(defun rule-responses (rule) (rest rule))
+
 (defun switch-viewpoint (words)
   (sublis '((I . you) (you . I) (me . you) (am . are))
           words))
@@ -111,7 +115,3 @@
             (if (eq b2 fail)
                 (segment-match pattern input bindings (+ pos 1))
               b2)))))))
-
-(defun rule-pattern (rule) (first rule))
-
-(defun rule-responses (rule) (rest rule))

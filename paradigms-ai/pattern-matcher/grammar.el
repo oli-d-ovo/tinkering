@@ -11,7 +11,7 @@
 (setf (get '$if 'segment-match) 'match-if)
 
 (defun match-is (var-and-pred input bindings)
-  (let* ((var (first (var-and-pred)))
+  (let* ((var (first var-and-pred))
          (pred (second var-and-pred))
          (new-bindings (pat-match var input bindings)))
     (if (or (eq new-bindings fail)

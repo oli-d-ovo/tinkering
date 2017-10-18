@@ -9,21 +9,21 @@
   {:color 0
    :time 0
    :movers []
-   :forces [[0 0.8]]
+   :gravity [[0 0.8]]
    :mouse-position [0 0]})
 
 (defn ->mover
   []
   {:location [(q/random (q/width)) (q/random (q/height))]
-   :mass (q/random 32)
+   :mass (q/random 5)
    :velocity [0 0]
    :acceleration [0 0]})
 
 (defn update-mover
-  [forces]
+  [[gravity & forces]]
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
-          new-acceleration (->> forces
+          new-acceleration (->> (conj forces (v/mult gravity mass))
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add [0 0]))
           new-velocity (-> (v/add velocity new-acceleration)
@@ -49,7 +49,7 @@
   (assoc initial-state :movers (repeatedly 20 ->mover)))
 
 (defn update-state [state]
-  (let [forces (concat (:forces state) (additional-forces (:time state)))
+  (let [forces (concat (:gravity state) (additional-forces (:time state)))
         mouse-position [(q/mouse-x) (q/mouse-y)]]
     (-> state
         (update :color #(mod (+ % 0.7) 255))
@@ -64,7 +64,8 @@
   (q/stroke-weight 3)
 
   (doseq [{:keys [location mass]} (:movers state)]
-    (apply q/ellipse (concat location [mass mass]))))
+    (let [r (* mass 16)]
+      (apply q/ellipse (concat location [r r])))))
 
 (q/defsketch nature-of-code
   :title "You spin my circle right round"

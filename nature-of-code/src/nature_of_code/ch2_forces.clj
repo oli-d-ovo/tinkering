@@ -15,12 +15,13 @@
 (defn ->mover
   []
   {:location [(q/random (q/width)) (q/random (q/height))]
+   :mass (q/random 16)
    :velocity [0 0]
    :acceleration [0 0]})
 
 (defn update-mover
   [forces]
-  (fn [{:keys [location velocity acceleration] :as m}]
+  (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
           new-acceleration (->> forces
                                 (map f/->acceleration)
@@ -29,9 +30,9 @@
                            (v/multv coll-vel)
                            (v/limit 10))
           new-location (v/add coll-loc new-velocity)]
-      {:location new-location
-       :velocity new-velocity
-       :acceleration new-acceleration})))
+      (assoc m :location new-location
+               :velocity new-velocity
+               :acceleration new-acceleration))))
 
 (defn additional-forces
   [perlin-time]
@@ -62,8 +63,8 @@
   (q/stroke 20)
   (q/stroke-weight 3)
 
-  (doseq [{:keys [location]} (:movers state)]
-    (apply q/ellipse (concat location [16 16]))))
+  (doseq [{:keys [location mass]} (:movers state)]
+    (apply q/ellipse (concat location [mass mass]))))
 
 (q/defsketch nature-of-code
   :title "You spin my circle right round"

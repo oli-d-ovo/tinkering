@@ -6,31 +6,28 @@
 
 (def initial-state
   {:color 0
-   :angle 0
+   :time 0
    :movers []
    :mouse-position [0 0]})
 
 (defn ->mover
-  ([]
-   (->mover 2))
-  ([v]
-   {:location [(/ (q/width) 2) (/ (q/height) 2)]
-    :velocity [0 0]
-    :acceleration [0 0]}))
+  []
+  {:location [(q/random (q/width)) (q/random (q/height))]
+   :velocity [0 0]
+   :acceleration [0 0]})
 
 (defn update-mover
-  [{:keys [location velocity acceleration] :as m}]
-  (let [new-acceleration (cond (= (q/key-as-keyword) :right) [1 0]
-                               (= (q/key-as-keyword) :left) [-1 0]
-                               :else acceleration)
-        new-velocity (-> (v/add velocity new-acceleration)
-                         (v/limit 10))
-        new-location (-> (v/add location new-velocity)
-                         (v/flip [0 (q/width)]
-                                 [0 (q/height)]))]
-    {:location new-location
-     :velocity new-velocity
-     :acceleration acceleration}))
+  [mouse-position]
+  (fn [{:keys [location velocity acceleration] :as m}]
+    (let [new-acceleration (-> (v/sub mouse-position location)
+                               v/normalize
+                               (v/mult 0.5))
+          new-velocity (-> (v/add velocity new-acceleration)
+                           (v/limit 10))
+          new-location (v/add location new-velocity)]
+      {:location new-location
+       :velocity new-velocity
+       :acceleration new-acceleration})))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
@@ -39,15 +36,17 @@
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
   ; circle color and position.
-  (assoc initial-state :movers (repeatedly 5 #(->mover 5))))
+  (assoc initial-state :movers (repeatedly 10 ->mover)))
 
 (defn update-state [state]
-  (-> state
-      (update :color #(mod (+ % 0.7) 255))
-      (update :angle #(+ % 0.1))
-      (update :movers #(map update-mover %))
-      (assoc :centre [(/ (q/width) 2) (/ (q/height) 2)])
-      (assoc :mouse-position [(q/mouse-x) (q/mouse-y)])))
+  (let [perlin-time (:time state)
+        mouse-position [(q/mouse-x) (q/mouse-y)]]
+    (-> state
+        (update :color #(mod (+ % 0.7) 255))
+        (update :time + 0.01)
+        (update :movers #(map (update-mover mouse-position) %))
+        (assoc :centre [(/ (q/width) 2) (/ (q/height) 2)])
+        (assoc :mouse-position mouse-position))))
 
 (defn draw-state [state]
   (q/background 240)

@@ -6,13 +6,13 @@
   force)
 
 (defn- collide-scalar
-  [s min max]
+  [s [min max]]
   (cond (> s max) [max -1]
         (< s min) [min -1]
         :else [s 1]))
 
 (defn collide
   [[x y] x-bounds y-bounds]
-  (->> [(apply (partial collide-scalar x) x-bounds)
-        (apply (partial collide-scalar y) y-bounds)]
+  (->> [(collide-scalar x x-bounds)
+        (collide-scalar y y-bounds)]
        (apply mapv vector)))

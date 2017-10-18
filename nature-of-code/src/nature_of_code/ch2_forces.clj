@@ -9,7 +9,7 @@
   {:color 0
    :time 0
    :movers []
-   :forces [[0 -0.08]]
+   :forces [[0 0.8]]
    :mouse-position [0 0]})
 
 (defn ->mover
@@ -24,13 +24,11 @@
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
           new-acceleration (->> forces
                                 (map f/->acceleration)
-                                (reduce v/add acceleration))
+                                (reduce v/add [0 0]))
           new-velocity (-> (v/add velocity new-acceleration)
                            (v/multv coll-vel)
                            (v/limit 10))
-          new-location (if (= location coll-loc)
-                         (v/add location new-velocity)
-                         coll-loc)]
+          new-location (v/add coll-loc new-velocity)]
       {:location new-location
        :velocity new-velocity
        :acceleration new-acceleration})))
@@ -38,7 +36,7 @@
 (defn additional-forces
   [perlin-time]
   [(if (q/mouse-pressed?) [0.5 0])
-   (v/mult [0.2 0] (q/noise perlin-time))])
+   (v/mult [0 0] (q/noise perlin-time))])
 
 (defn setup []
   ; Set frame rate to 30 frames per second.

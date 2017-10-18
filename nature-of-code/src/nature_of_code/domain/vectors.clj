@@ -44,3 +44,10 @@
   [[x y] x-bounds y-bounds]
   [(apply (partial flip-scalar x) x-bounds)
    (apply (partial flip-scalar y) y-bounds)])
+
+(defn limit
+  [v l]
+  (let [magnitude (mag v)]
+    (if (< magnitude l)
+      v
+      (div v (/ magnitude l)))))

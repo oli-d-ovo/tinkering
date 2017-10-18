@@ -1,7 +1,8 @@
 (ns nature-of-code.ch1-vectors
   (:require [quil.core :as q]
             [quil.middleware :as m]
-            [nature-of-code.domain.vectors :as v]))
+            [nature-of-code.domain.vectors :as v]
+            [nature-of-code.domain.keys :as k]))
 
 (def initial-state
   {:color 0
@@ -13,16 +14,23 @@
   ([]
    (->mover 2))
   ([v]
-   {:location [(q/random (q/width)) (q/random (q/height))]
-    :velocity [(q/random (- v) v) (q/random (- v) v)]}))
+   {:location [(/ (q/width) 2) (/ (q/height) 2)]
+    :velocity [0 0]
+    :acceleration [0 0]}))
 
 (defn update-mover
   [{:keys [location velocity acceleration] :as m}]
-  (let [new-velocity (v/add velocity acceleration)
+  (let [new-acceleration (cond (= (q/key-as-keyword) :right) [1 0]
+                               (= (q/key-as-keyword) :left) [-1 0]
+                               :else acceleration)
+        new-velocity (-> (v/add velocity new-acceleration)
+                         (v/limit 10))
         new-location (-> (v/add location new-velocity)
                          (v/flip [0 (q/width)]
                                  [0 (q/height)]))]
-    (assoc m :location new-location)))
+    {:location new-location
+     :velocity new-velocity
+     :acceleration acceleration}))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.

@@ -15,7 +15,7 @@
 (defn ->mover
   []
   {:location [(q/random (q/width)) (q/random (q/height))]
-   :mass (q/random 16)
+   :mass (q/random 32)
    :velocity [0 0]
    :acceleration [0 0]})
 
@@ -24,7 +24,7 @@
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
           new-acceleration (->> forces
-                                (map f/->acceleration)
+                                (map #(f/->acceleration % mass))
                                 (reduce v/add [0 0]))
           new-velocity (-> (v/add velocity new-acceleration)
                            (v/multv coll-vel)
@@ -36,7 +36,7 @@
 
 (defn additional-forces
   [perlin-time]
-  [(if (q/mouse-pressed?) [0.5 0])
+  [(if (q/mouse-pressed?) [0.5 0] [0 0])
    (v/mult [0 0] (q/noise perlin-time))])
 
 (defn setup []
@@ -46,7 +46,7 @@
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
   ; circle color and position.
-  (assoc initial-state :movers (repeatedly 10 ->mover)))
+  (assoc initial-state :movers (repeatedly 20 ->mover)))
 
 (defn update-state [state]
   (let [forces (concat (:forces state) (additional-forces (:time state)))

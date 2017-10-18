@@ -2,8 +2,8 @@
   (:require [nature-of-code.domain.vectors :as v]))
 
 (defn ->acceleration
-  [force]
-  force)
+  [force mass]
+  (v/div force mass))
 
 (defn- collide-scalar
   [s [min max]]

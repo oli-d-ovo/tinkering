@@ -1,5 +1,7 @@
 (ns nature-of-code.domain.vectors)
 
+(def zero [0 0])
+
 (defn- op
   [f x1 x2]
   (if x2 (map f x1 x2) x1))
@@ -11,6 +13,14 @@
 (defn add
   [v1 v2]
   (op + v1 v2))
+
+(defn multv
+  [v1 v2]
+  (op * v1 v2))
+
+(defn divv
+  [v1 v2]
+  (op / v1 v2))
 
 (defn mult
   [v n]

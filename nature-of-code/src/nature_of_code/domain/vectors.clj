@@ -1,20 +1,24 @@
 (ns nature-of-code.domain.vectors)
 
+(defn- op
+  [f x1 x2]
+  (if x2 (map f x1 x2) x1))
+
 (defn sub
   [v1 v2]
-  (map - v1 v2))
+  (op - v1 v2))
 
 (defn add
   [v1 v2]
-  (map + v1 v2))
+  (op + v1 v2))
 
 (defn mult
   [v n]
-  (map (partial * n) v))
+  (map #(* % (or n 1)) v))
 
 (defn div
   [v n]
-  (map #(/ % n) v))
+  (map #(/ % (or n 1)) v))
 
 (defn mag
   [v]

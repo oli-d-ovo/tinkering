@@ -1,4 +1,4 @@
-(ns nature-of-code.core
+(ns nature-of-code.ch1-vectors
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [nature-of-code.domain.vectors :as v]))
@@ -17,8 +17,9 @@
     :velocity [(q/random (- v) v) (q/random (- v) v)]}))
 
 (defn update-mover
-  [{:keys [location velocity] :as m}]
-  (let [new-location (-> (v/add location velocity)
+  [{:keys [location velocity acceleration] :as m}]
+  (let [new-velocity (v/add velocity acceleration)
+        new-location (-> (v/add location new-velocity)
                          (v/flip [0 (q/width)]
                                  [0 (q/height)]))]
     (assoc m :location new-location)))

@@ -10,6 +10,8 @@
    :time 0
    :movers []
    :gravity [[0 0.2]]
+   :forces {:gravity [0 0.2]
+            :drag [0 0]}
    :mouse-position [0 0]})
 
 (defn ->mover
@@ -20,10 +22,11 @@
    :acceleration [0 0]})
 
 (defn update-mover
-  [[gravity & forces]]
+  [{:keys [gravity additional]}]
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
-          new-acceleration (->> (conj forces (f/friction velocity 0.1) (v/mult gravity mass))
+          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass))
+                                (concat additional)
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add acceleration))
           new-velocity (-> (v/add velocity new-acceleration)
@@ -48,7 +51,8 @@
   (assoc initial-state :movers (repeatedly 20 ->mover)))
 
 (defn update-state [state]
-  (let [forces (concat (:gravity state) (additional-forces (:time state)))
+  (let [forces (-> (:forces state)
+                   (assoc :additional (additional-forces (:time state))))
         mouse-position [(q/mouse-x) (q/mouse-y)]]
     (-> state
         (update :color #(mod (+ % 0.7) 255))

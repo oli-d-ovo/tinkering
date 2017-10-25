@@ -9,9 +9,8 @@
   {:color 0
    :time 0
    :movers []
-   :gravity [[0 0.2]]
-   :forces {:gravity [0 0.2]
-            :drag [0 0]}
+   :surfaces []
+   :forces {:gravity [0 0.2]}
    :mouse-position [0 0]})
 
 (defn ->mover
@@ -21,11 +20,31 @@
    :velocity [0 0]
    :acceleration [0 0]})
 
+(defn ->surface
+  [x y width height drag]
+  {:position [x y width height]
+   :drag drag})
+
+(defn- inside?
+  [[x1 y1 x2 y2] [x y]]
+  (and (< x1 x (+ x1 x2))
+       (< y1 y (+ y1 y2))))
+
+(defn drag-at
+  [location velocity surfaces]
+  (let [speed (v/mag velocity)]
+    (->> surfaces
+         (filter #(inside? (:position %) location))
+         (map :drag)
+         (reduce +)
+         (* speed speed))))
+
 (defn update-mover
-  [{:keys [gravity additional]}]
+  [{:keys [gravity additional]} surfaces]
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
-          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass))
+          drag (drag-at location velocity surfaces)
+          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass) (f/friction velocity drag))
                                 (concat additional)
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add acceleration))
@@ -48,21 +67,30 @@
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
   ; circle color and position.
-  (assoc initial-state :movers (repeatedly 20 ->mover)))
+  (assoc initial-state
+         :movers (repeatedly 20 ->mover)
+         :surfaces [(->surface 0 (/ (q/height) 2) (q/width) (/ (q/height) 2) 0.1)]))
 
-(defn update-state [state]
-  (let [forces (-> (:forces state)
+(defn update-state [{:keys [forces surfaces] :as state}]
+  (let [forces (-> forces
                    (assoc :additional (additional-forces (:time state))))
         mouse-position [(q/mouse-x) (q/mouse-y)]]
     (-> state
         (update :color #(mod (+ % 0.7) 255))
         (update :time + 0.01)
-        (update :movers #(map (update-mover forces) %))
+        (update :movers #(map (update-mover forces surfaces) %))
         (assoc :centre [(/ (q/width) 2) (/ (q/height) 2)])
         (assoc :mouse-position mouse-position))))
 
 (defn draw-state [state]
   (q/background 240)
+
+  (q/no-stroke)
+  (doseq [{:keys [position drag]} (:surfaces state)]
+    (q/fill (* 255 drag))
+    (apply q/rect position))
+
+  (q/fill 200)
   (q/stroke 20)
   (q/stroke-weight 3)
 

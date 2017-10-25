@@ -7,9 +7,9 @@
 
 (defn- collide-scalar
   [s [min max]]
-  (cond (> s max) [max -1]
-        (< s min) [min -1]
-        :else [s 1]))
+  (cond (> s max) [(- max s) -1]
+        (< s min) [(- min s) -1]
+        :else [0 1]))
 
 (defn collide
   [[x y] x-bounds y-bounds]

@@ -42,17 +42,16 @@
 (defn update-mover
   [{:keys [gravity additional]} surfaces]
   (fn [{:keys [location mass velocity acceleration] :as m}]
-    (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
-          drag (drag-at location velocity surfaces)
+    (let [drag (drag-at location velocity surfaces)
           new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass) (f/friction velocity drag))
                                 (concat additional)
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add acceleration))
-          new-velocity (-> (v/add velocity new-acceleration)
-                           (v/multv coll-vel))
-          new-location (v/add coll-loc new-velocity)]
-      (assoc m :location new-location
-               :velocity new-velocity
+          new-velocity (v/add velocity new-acceleration)
+          new-location (v/add location new-velocity)
+          [coll-loc coll-vel] (f/collide new-location [0 (q/width)] [0 (q/height)])]
+      (assoc m :location (v/add new-location coll-loc)
+               :velocity (v/multv new-velocity coll-vel)
                :acceleration [0 0]))))
 
 (defn additional-forces

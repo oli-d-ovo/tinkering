@@ -3,19 +3,19 @@
             [quil.middleware :as m]
             [nature-of-code.domain.vectors :as v]
             [nature-of-code.domain.forces :as f]
-            [nature-of-code.domain.keys :as k]))
+            [nature-of-code.util.keys :as k]))
 
 (def initial-state
   {:color 0
    :time 0
    :movers []
-   :gravity [[0 0.8]]
+   :gravity [[0 0.2]]
    :mouse-position [0 0]})
 
 (defn ->mover
   []
-  {:location [(q/random (q/width)) (q/random (q/height))]
-   :mass (q/random 5)
+  {:location [(q/random (q/width)) 0]
+   :mass (q/random 1 5)
    :velocity [0 0]
    :acceleration [0 0]})
 
@@ -23,16 +23,15 @@
   [[gravity & forces]]
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [[coll-loc coll-vel] (f/collide location [0 (q/width)] [0 (q/height)])
-          new-acceleration (->> (conj forces (v/mult gravity mass))
+          new-acceleration (->> (conj forces (f/friction velocity 0.1) (v/mult gravity mass))
                                 (map #(f/->acceleration % mass))
-                                (reduce v/add [0 0]))
+                                (reduce v/add acceleration))
           new-velocity (-> (v/add velocity new-acceleration)
-                           (v/multv coll-vel)
-                           (v/limit 10))
+                           (v/multv coll-vel))
           new-location (v/add coll-loc new-velocity)]
       (assoc m :location new-location
                :velocity new-velocity
-               :acceleration new-acceleration))))
+               :acceleration [0 0]))))
 
 (defn additional-forces
   [perlin-time]
@@ -75,7 +74,7 @@
   ; update-state is called on each iteration before draw-state.
   :update update-state
   :draw draw-state
-  :features [:keep-on-top]
+  :features [:keep-on-top :no-bind-output]
   ; This sketch uses functional-mode middleware.
   ; Check quil wiki for more info about middlewares and particularly
   ; fun-mode.

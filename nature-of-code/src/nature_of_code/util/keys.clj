@@ -1,4 +1,4 @@
-(ns nature-of-code.domain.keys
+(ns nature-of-code.util.keys
   (:require [quil.core :as q]))
 
 (defn for-keys

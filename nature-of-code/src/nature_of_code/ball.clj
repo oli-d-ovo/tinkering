@@ -26,11 +26,12 @@
   (q/fill 175)
   (q/ellipse x y 16 16))
 
-(q/defsketch bouncing-ball
-  :title "You spin my circle right round"
-  :size [500 500]
-  :setup setup
-  :update update-state
-  :draw draw-state
-  :features [:keep-on-top]
-  :middleware [m/fun-mode])
+(comment
+  (q/defsketch bouncing-ball
+    :title "You spin my circle right round"
+    :size [500 500]
+    :setup setup
+    :update update-state
+    :draw draw-state
+    :features [:keep-on-top]
+    :middleware [m/fun-mode]))

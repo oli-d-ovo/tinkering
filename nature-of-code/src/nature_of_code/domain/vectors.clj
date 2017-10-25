@@ -40,7 +40,7 @@
 (defn normalize
   [v]
   (let [m (mag v)]
-    (if (= m 0)
+    (if (zero? m)
       v
       (div v m))))
 
@@ -58,6 +58,6 @@
 (defn limit
   [v l]
   (let [magnitude (mag v)]
-    (if (< magnitude l)
+    (if (or (zero? magnitude) (< magnitude l))
       v
       (div v (/ magnitude l)))))

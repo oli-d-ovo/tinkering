@@ -2,7 +2,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [nature-of-code.domain.vectors :as v]
-            [nature-of-code.domain.keys :as k]))
+            [nature-of-code.util.keys :as k]))
 
 (def initial-state
   {:color 0
@@ -56,16 +56,17 @@
   (doseq [{:keys [location]} (:movers state)]
     (apply q/ellipse (concat location [16 16]))))
 
-(q/defsketch nature-of-code
-  :title "You spin my circle right round"
-  :size [500 500]
-  ; setup function called only once, during sketch initialization.
-  :setup setup
-  ; update-state is called on each iteration before draw-state.
-  :update update-state
-  :draw draw-state
-  :features [:keep-on-top]
-  ; This sketch uses functional-mode middleware.
-  ; Check quil wiki for more info about middlewares and particularly
-  ; fun-mode.
-  :middleware [m/fun-mode])
+(comment
+  (q/defsketch nature-of-code
+    :title "You spin my circle right round"
+    :size [500 500]
+                                        ; setup function called only once, during sketch initialization.
+    :setup setup
+                                        ; update-state is called on each iteration before draw-state.
+    :update update-state
+    :draw draw-state
+    :features [:keep-on-top]
+                                        ; This sketch uses functional-mode middleware.
+                                        ; Check quil wiki for more info about middlewares and particularly
+                                        ; fun-mode.
+    :middleware [m/fun-mode]))

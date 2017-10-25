@@ -16,3 +16,10 @@
   (->> [(collide-scalar x x-bounds)
         (collide-scalar y y-bounds)]
        (apply mapv vector)))
+
+(defn friction
+  [velocity magnitude]
+  (-> velocity
+      (v/mult -1)
+      v/normalize
+      (v/mult magnitude)))

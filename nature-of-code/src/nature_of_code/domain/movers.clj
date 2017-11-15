@@ -20,18 +20,18 @@
        (map #(f/attract m %))))
 
 (defn- update-angular
-  [{:keys [angle velocity] :as a} acceleration]
-  (let [new-velocity (+ velocity acceleration)]
+  [{:keys [angle] :as a} v]
+  (let [new-angle (v/heading v)]
     (assoc a
-           :velocity new-velocity
-           :angle (+ angle new-velocity))))
+           :angle new-angle)))
 
 (defn update-mover
-  [{:keys [gravity additional]} surfaces movers]
+  [{:keys [gravity additional]} surfaces movers mouse-position]
   (fn [{:keys [location mass velocity acceleration angular] :as m}]
     (let [drag (s/drag-at location surfaces)
           attraction (attract-mover m movers)
-          new-acceleration (->> (vector (v/mult gravity mass) (f/drag velocity drag) #_(v/sub location mouse-position))
+          mouse-attractor (-> (v/sub mouse-position location) v/normalize (v/mult 0.5))
+          new-acceleration (->> (vector (v/mult gravity mass) (f/drag velocity drag) mouse-attractor)
                                 (concat attraction)
                                 (concat additional)
                                 (map #(f/->acceleration % mass))
@@ -41,4 +41,4 @@
       (assoc m :location new-location
                :velocity new-velocity
                :acceleration [0 0]
-               :angular (update-angular angular (/ (first new-acceleration) 10))))))
+               :angular (update-angular angular new-velocity)))))

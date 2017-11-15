@@ -3,19 +3,17 @@
             [quil.middleware :as m]
             [nature-of-code.domain.movers :as movers]))
 
-(defn apply-if
-  [pred f v]
-  (if pred (f v) v))
-
 (defn setup []
   (q/frame-rate 30)
   (q/color-mode :hsb)
 
-  {:movers (repeatedly 2 movers/->mover)})
+  {:movers (repeatedly 20 movers/->mover)
+   :mouse-position []})
 
-(defn update-state [{:keys [forces surfaces] :as state}]
+(defn update-state [{:keys [forces surfaces mouse-position] :as state}]
   (-> state
-      (update :movers #(map (movers/update-mover forces surfaces %) %))))
+      (assoc :mouse-position [(q/mouse-x) (q/mouse-y)])
+      (update :movers #(map (movers/update-mover forces surfaces % mouse-position) %))))
 
 (defn draw-state [state]
   (q/background 240)
@@ -30,12 +28,12 @@
       (q/push-matrix)
       (apply q/translate location)
       (q/rotate (:angle angular))
-      (q/rect 0 0 r r)
+      (q/rect 0 0 r (/ r 2))
       (q/pop-matrix))))
 
 (q/defsketch nature-of-code
   :title "You spin my circle right round"
-  :size [500 500]
+  :size [1000 1000]
   :setup setup
   :update update-state
   :draw draw-state

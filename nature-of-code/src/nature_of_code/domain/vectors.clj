@@ -61,3 +61,7 @@
     (if (or (zero? magnitude) (< magnitude l))
       v
       (div v (/ magnitude l)))))
+
+(defn heading
+  [[x y]]
+  (Math/atan2 y x))

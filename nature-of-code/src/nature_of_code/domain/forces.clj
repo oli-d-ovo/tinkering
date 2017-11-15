@@ -1,5 +1,6 @@
 (ns nature-of-code.domain.forces
-  (:require [nature-of-code.domain.vectors :as v]))
+  (:require [nature-of-code.domain.vectors :as v]
+            [nature-of-code.domain.utils :as u]))
 
 (defn ->acceleration
   [force mass]
@@ -31,3 +32,13 @@
         (v/mult -1)
         v/normalize
         (v/mult (* c speed speed)))))
+
+(defn attract
+  [{l1 :location m1 :mass}
+   {l2 :location m2 :mass}]
+  (let [f (v/sub l2 l1)
+        d (u/constrain (v/mag f) 5.0 25.0)
+        strength (/ (* 2 m1 m2) (* d d))]
+    (-> f
+        v/normalize
+        (v/mult strength))))

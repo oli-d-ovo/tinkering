@@ -4,7 +4,7 @@
 
 (defn- op
   [f x1 x2]
-  (if x2 (map f x1 x2) x1))
+  (if (empty? x2) x1 (map f x1 x2)))
 
 (defn sub
   [v1 v2]

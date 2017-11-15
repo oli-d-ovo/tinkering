@@ -1,4 +1,4 @@
-(ns nature-of-code.ch2-forces
+(ns nature-of-code.ch2-forces-gravity
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [nature-of-code.domain.vectors :as v]
@@ -11,12 +11,12 @@
    :time 0
    :movers []
    :surfaces []
-   :forces {:gravity [0 0.2]}
+   :forces {:gravity [0 0]}
    :mouse-position [0 0]})
 
 (defn ->mover
   []
-  {:location [(q/random (q/width)) 0]
+  {:location [(q/random (q/width)) (q/random (q/height))]
    :mass (q/random 1 5)
    :velocity [0 0]
    :acceleration [0 0]})
@@ -33,20 +33,27 @@
        (map :drag)
        (reduce +)))
 
+(defn attract-mover
+  [m ms]
+  (->> ms
+       (filter #(not= m %))
+       (map #(f/attract m %))))
+
 (defn update-mover
-  [{:keys [gravity additional]} surfaces]
+  [{:keys [gravity additional]} surfaces movers]
   (fn [{:keys [location mass velocity acceleration] :as m}]
     (let [drag (drag-at location surfaces)
-          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass) (f/drag velocity drag))
+          attraction (attract-mover m movers)
+          new-acceleration (->> (vector (v/mult gravity mass) (f/drag velocity drag))
+                                (concat attraction)
                                 (concat additional)
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add acceleration))
           new-velocity (v/add velocity new-acceleration)
-          new-location (v/add location new-velocity)
-          [coll-loc coll-vel] (f/collide new-location [0 (q/width)] [0 (q/height)])]
-      (assoc m :location (v/add new-location coll-loc)
-               :velocity (v/multv new-velocity coll-vel)
-               :acceleration [0 0]))))
+          new-location (v/add location new-velocity)]
+      (assoc m :location new-location
+             :velocity new-velocity
+             :acceleration [0 0]))))
 
 (defn additional-forces
   [perlin-time]
@@ -61,8 +68,7 @@
   ; setup function returns initial state. It contains
   ; circle color and position.
   (assoc initial-state
-         :movers (repeatedly 20 ->mover)
-         :surfaces [(->surface 0 (/ (q/height) 2) (q/width) (/ (q/height) 2) 0.1)]))
+         :movers (repeatedly 20 ->mover)))
 
 (defn update-state [{:keys [forces surfaces] :as state}]
   (let [forces (-> forces
@@ -71,7 +77,7 @@
     (-> state
         (update :color #(mod (+ % 0.7) 255))
         (update :time + 0.01)
-        (update :movers #(map (update-mover forces surfaces) %))
+        (update :movers #(map (update-mover forces surfaces %) %))
         (assoc :centre [(/ (q/width) 2) (/ (q/height) 2)])
         (assoc :mouse-position mouse-position))))
 
@@ -87,9 +93,12 @@
   (q/stroke 20)
   (q/stroke-weight 3)
 
-  (doseq [{:keys [location mass]} (:movers state)]
+  (doseq [{:keys [location mass angular]} (:movers state)]
     (let [r (* mass 16)]
-      (apply q/ellipse (concat location [r r])))))
+      (q/push-matrix)
+      (q/rotate (:angle angular))
+      (apply q/ellipse (concat location [r r]))
+      (q/pop-matrix))))
 
 (comment
   (q/defsketch nature-of-code

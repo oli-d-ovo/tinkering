@@ -31,19 +31,17 @@
        (< y1 y (+ y1 y2))))
 
 (defn drag-at
-  [location velocity surfaces]
-  (let [speed (v/mag velocity)]
-    (->> surfaces
-         (filter #(inside? (:position %) location))
-         (map :drag)
-         (reduce +)
-         (* speed speed))))
+  [location surfaces]
+  (->> surfaces
+       (filter #(inside? (:position %) location))
+       (map :drag)
+       (reduce +)))
 
 (defn update-mover
   [{:keys [gravity additional]} surfaces]
   (fn [{:keys [location mass velocity acceleration] :as m}]
-    (let [drag (drag-at location velocity surfaces)
-          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass) (f/friction velocity drag))
+    (let [drag (drag-at location surfaces)
+          new-acceleration (->> (vector (f/friction velocity 0.1) (v/mult gravity mass) (f/drag velocity drag))
                                 (concat additional)
                                 (map #(f/->acceleration % mass))
                                 (reduce v/add acceleration))

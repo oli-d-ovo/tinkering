@@ -23,3 +23,11 @@
       (v/mult -1)
       v/normalize
       (v/mult magnitude)))
+
+(defn drag
+  [velocity c]
+  (let [speed (v/mag velocity)]
+    (-> velocity
+        (v/mult -1)
+        v/normalize
+        (v/mult (* c speed speed)))))
